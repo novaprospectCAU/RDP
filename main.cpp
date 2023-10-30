@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "utils.hpp"
 
 using namespace std;
@@ -21,25 +22,32 @@ int main(int argc, char *argv[])
 		cout << "file not existed" << endl;
 		return 0;
 	}
-	unsigned int word_count = 0;
+
+	int line_count = 0;
 	while (!ifs.eof())
 	{
-		char readline[256];
-		ifs.getline(readline, 256);
-		word_count++;
+		char line_temp[128];
+		ifs.getline(line_temp, 128);
+		line_count++;
 	}
+	string str_split[line_count][64];
 	ifs.close();
-	string *strlist = new string[word_count + 1];
-	strlist[word_count] = nullptr;
+
 	ifs.open(FILENAME);
-	unsigned int strlist_index = 0;
+	int line_index = 0;
 	while (!ifs.eof())
 	{
-		char readline[256];
-		ifs.getline(readline, 256);
-		strlist[strlist_index] = readline;
-		strlist_index++;
+		int word_index = 0;
+		char line_temp[128];
+		ifs.getline(line_temp, 128);
+		istringstream temp(line_temp);
+		string word;
+		while (temp >> word)
+		{
+			str_split[line_index][word_index] = word;
+			word_index++;
+		}
+		line_index++;
 	}
-	ifs.close();
 	return 0;
 }
