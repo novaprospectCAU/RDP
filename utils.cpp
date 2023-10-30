@@ -38,7 +38,7 @@ bool word_checker(string word)
   }
   for (int i = 0; i < word.length(); i++)
   {
-    if (!isalnum(word.at(i)))
+    if (!isalnum(word.at(i)) || word.at(i) != '_')
     {
       return false;
     }
