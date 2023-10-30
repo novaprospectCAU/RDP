@@ -21,10 +21,24 @@ int main(int argc, char *argv[])
 		cout << "file not existed" << endl;
 		return 0;
 	}
+	unsigned int word_count = 0;
 	while (!ifs.eof())
 	{
 		char readline[256];
 		ifs.getline(readline, 256);
+		word_count++;
+	}
+	ifs.close();
+	string *strlist = new string[word_count + 1];
+	strlist[word_count] = nullptr;
+	ifs.open(FILENAME);
+	unsigned int strlist_index = 0;
+	while (!ifs.eof())
+	{
+		char readline[256];
+		ifs.getline(readline, 256);
+		strlist[strlist_index] = readline;
+		strlist_index++;
 	}
 	ifs.close();
 	return 0;
