@@ -49,5 +49,6 @@ int main(int argc, char *argv[])
 		}
 		line_index++;
 	}
+	ifs.close();
 	return 0;
 }
