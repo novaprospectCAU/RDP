@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	{
 		char readline[256];
 		ifs.getline(readline, 256);
-		}
+	}
 	ifs.close();
 	return 0;
 }
