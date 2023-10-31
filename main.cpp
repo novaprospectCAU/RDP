@@ -1,14 +1,56 @@
 #include <iostream>
 #include <string>
-#include "token.h"
 
-#define DEFAULT_FILE "eval1.txt"
+using namespace std;
+
+class RDP { //recursive descent parsing
+    typedef enum {
+        NONE = 0,
+
+        IDENT, // any names conforming to C identifier rules
+        CONST, // any decimal numbers
+
+        OP_ASSIGN, // :=
+        OP_PLUS = '+',
+        OP_MINUS = '-',
+        OP_MULTIPLY = '*',
+        OP_DIVIDE = '/',
+
+        SEMICOLON = ';',
+        LPAREN = '(',
+        RPAREN = ')'
+    } TOKEN_TYPE;
+public:
+    RDP(const char *filepath) {
+        _fp = fopen(filepath, "r");
+    }
+
+    ~RDP() {
+        if (_fp) fclose(_fp);
+    }
+private:
+    void getChar() {}
+    bool isSpace(char c) {}
+    bool isOperator(char c) {}
+    bool isSpecial(char c) {}
+
+    void msgError(const char *msg) {}
+    void msgWarning(const char *msg) {}
+    void printSymbolTable() {}
+
+    void factor() {}
+    void term() {}
+    void expression() {}
+    void statement() {}
+    void statements() {}
+    void lexical() {}
+};
 
 int main(int argc, char *argv[])
 {
-    RecursiveToken tok(argc == 2 ? argv[1] : DEFAULT_FILE);
-    RecursiveParsing parse(tok);
-    parse.run();
+    if (argc != 2) {
+        cout << "usage: " << argv[0] << "<input.txt>\n";
+    }
 
 	return 0;
 }
