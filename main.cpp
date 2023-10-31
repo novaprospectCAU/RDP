@@ -83,12 +83,107 @@ private:
         cout << endl;
     }
 
-    void factor() {}
-    void term() {}
-    void expression() {}
-    void statement() {}
-    void statements() {}
-    void lexical() {}
+    void factor() {
+        if (nextToken == TOKEN_TYPE::IDENT) {
+            //TODO
+            lexical();
+        } else if (nextToken == TOKEN_TYPE::CONST) {
+            lexical();
+        } else if (nextToken == TOKEN_TYPE::LPAREN) {
+            lexical();
+            expression();
+            if (nextToken == TOKEN_TYPE::RPAREN) lexical();
+            else error("missing right parenthesis");
+        } else {
+            error("??? #2");
+        }
+    }
+
+    void term() {
+        factor();
+        while (next_token == TOKEN_TYPE::OP_MULTIPLY || nextToken == TOKEN_TYPE::OP_DIVIDE) {
+            lexical();
+            factor();
+        }
+    }
+
+    void expression() {
+        if (nextToken == TOKEN_TYPE::OP_PLUS || nextToken == TOKEN_TYPE::OPMINUS) {
+            lexical();
+            term();
+        }
+    }
+
+    void statement() {
+        _ID = _CONST = _OP = 0;
+        if (nextToken == TOKEN_TYPE::IDENT) {
+            _ID = 1;
+            lexical();
+            if (nextToken == TOKEN_TYPE::OP_ASSIGN) lexical();
+            else error("missing assignment");
+            expression();
+        } else {
+            error("missing identifier");
+        }
+
+        cout << endl
+              << "ID: " << _ID
+              << "; CONST: " << _CONST
+              << "; OP: " << _OP << endl
+              << "(OK)" << endl;
+    }
+
+    void statements() {
+        do {
+            lexical();
+            statement();
+        } while (nextToken == TOKEN_TYPE::SEMICOLON);
+    }
+
+    void lexical() {
+        tokenString.clear();
+        if (isdigit(_ch)) {
+            while (isdigit(_ch)) {
+                tokenString.push_back(_ch);
+                getChar();
+            }
+            nextToken = TOKEN_TYPE::CONST;
+            _CONST++;
+        } else if (isalpha(_ch)) {
+            while (isalpha(_ch) || isdigit(_ch)) {
+                tokenString.push_back(_ch);
+                getChar();
+            }
+            nextToken = TOKEN_TYPE::IDENT;
+            _symTable[tokenString] = "";
+            _ID++;
+        } else if (isOperator(_ch)) {
+            char prev = _ch;
+            tokenString.push_back(_ch);
+            nextToken = (TOKEN_TYPE)_ch;
+            getChar();
+            _OP++;
+        } else if (isSpecial(_ch)) {
+            char prev = _ch;
+            tokenString.push_back(_ch);
+            nextToken = (TOKEN_TYPE)_ch;
+            getChar();
+
+            if (prev == ':' && ch == '=') {
+                tokenString.push_back(_ch);
+                nextToken = TOKEN_TYPE::OP_ASSIGN;
+                getChar();
+            }
+        } else if (_ch == EOF) {
+            nextToken = TOKEN_TYPE::NONE;
+        } else {
+            nextToken = TOKEN_TYPE::NONE;
+            getChar();
+        }
+        while (isspace(_ch)) getChar();
+
+        cout << tokenString << " ";
+    }
 };
 
 int main(int argc, char *argv[])
