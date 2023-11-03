@@ -226,7 +226,6 @@ cout << "--- " << id << "(" << _symTable[id] << ")\n"; //###
                 getChar();
             }
             nextToken = TOKEN_TYPE::IDENT;
-            //_symTable[tokenString] = "";
             _ID++;
         } else if (isOperator(_ch)) {
             tokenString.push_back(_ch);
@@ -267,15 +266,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
-/*
-#define DEFAULT_DATABASE "input.txt"
-
-int main(int argc, char *argv[])
-{
-    RDP rdp(argc == 2 ? argv[1] : DEFAULT_DATABASE);
-    rdp.parse();
-
-	return 0;
-}
-*/
