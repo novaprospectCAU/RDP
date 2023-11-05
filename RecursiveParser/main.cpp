@@ -54,10 +54,6 @@ private:
     vector<string> _tokens;
     map<string, string> _symTable;
 
-    void addToken() {
-        _tokens.push_back(token_string);
-    }
-
     void getChar() {
         _ch = fgetc(_fp);
     }
@@ -79,27 +75,30 @@ private:
     }
 
     void msgError(string msg) {
-        _result = "(Error) " + msg;
+        _result += "(Error) " + msg + "\n";
     }
 
     void msgWarning(string msg) {
-        _result = "(Warning) " + msg;
+        _result += "(Warning) " + msg + "\n";
     }
 
     void printStatement() {
         if (_tokens.size() == 0) return;
-        for (int i = 0; i < (int)_tokens.size()-1; i++) {
-            cout << _tokens[i];
-            if (_tokens[i] != "(" && _tokens[i+1] != ")") cout << " ";
+        string prev;
+        for (auto p = _tokens.begin(); p != _tokens.end(); p++) {
+            if (prev.empty() || prev == "(" || *p == ";" || *p == ")")
+                cout << *p;
+            else
+                cout << " " << *p;
+            prev = *p;
         }
-        cout << _tokens.back() << ";\n";
-        cout << "ID: " << _ID << "; CONST: " << _CONST << "; OP: " << _OP << endl;
-        cout << _result << endl;
+        cout << "\nID: " << _ID << "; CONST: " << _CONST << "; OP: " << _OP << endl;
+        cout << (_result.empty() ? "(OK)\n" : _result);
     }
 
     void printSymbolTable() {
         cout << "Result ==> ";
-        for (auto p = _symTable.begin(); p != _symTable.end(); ++p) {
+        for (auto p = _symTable.begin(); p != _symTable.end(); p++) {
             cout << p->first << ": " <<  (p->second != "" ? p->second : "Unknown") << "; ";
         }
         cout << endl;
@@ -109,7 +108,6 @@ private:
 cout << "   #FACTOR: " << token_string << endl; //###
         string ret;
         if (next_token == TOKEN_TYPE::IDENT) {
-            addToken();
             if (_symTable.find(token_string) == _symTable.end()) {
                 _symTable[token_string] = ""; //add variable
                 msgError("undefined variable (" + token_string + ") referenced");
@@ -118,20 +116,21 @@ cout << "   #FACTOR: " << token_string << endl; //###
 cout << "--- " << token_string << "(" << ret << ")\n"; //###
             lexical();
         } else if (next_token == TOKEN_TYPE::CONST) {
-            addToken();
             ret = token_string;
             lexical();
         } else if (next_token == TOKEN_TYPE::LPAREN) {
-            addToken();
             lexical();
             ret = expression();
             if (next_token == TOKEN_TYPE::RPAREN) {
-                addToken();
                 lexical();
             } else msgError("missing right parenthesis");
         } else { //try error correction
-            if (isOperator(token_string)) msgWarning("remove duplicated operator(" + token_string + ")");
-            else msgWarning("ignore incomplete syntax");
+            if (isOperator(token_string)) {
+                msgWarning("remove duplicated operator(" + token_string + ")");
+                _tokens.pop_back(); //remove duplicated token
+                lexical();
+                ret = factor(); //send token to next process anyway
+            } else msgWarning("ignore incomplete syntax");
         }
         return ret;
     }
@@ -141,10 +140,10 @@ cout << "   #TERM: " << token_string << endl; //###
         string ret = factor();
 cout << "   #FACTOR_TAIL: " << token_string << endl; //###
         while (next_token == TOKEN_TYPE::OP_MULTIPLY || next_token == TOKEN_TYPE::OP_DIVIDE) {
-            addToken();
             TOKEN_TYPE op = next_token;
             lexical();
             string val = factor();
+cout << "*****[" << ret << "][" << val << "]\n"; //###
             if (ret.empty() || val.empty());
             else if (op == TOKEN_TYPE::OP_MULTIPLY) {
                 ret = to_string(stoi(ret) * stoi(val));
@@ -160,10 +159,10 @@ cout << "   #EXPRESSION: " << token_string << endl; //###
         string ret = term();
 cout << "   #TERM_TAIL: " << token_string << endl; //###
         while (next_token == TOKEN_TYPE::OP_PLUS || next_token == TOKEN_TYPE::OP_MINUS) {
-            addToken();
             TOKEN_TYPE op = next_token;
             lexical();
             string val = term();
+cout << "***[" << ret << "][" << val << "]\n"; //###
             if (ret.empty() || val.empty());
             else if (op == TOKEN_TYPE::OP_PLUS) {
                 ret = to_string(stoi(ret) + stoi(val));
@@ -175,32 +174,33 @@ cout << "   #TERM_TAIL: " << token_string << endl; //###
     }
 
     void statement() {
-        _result = "(OK)";
-        _tokens.clear();
+        _result = "";
         _ID = _CONST = _OP = 0;
 cout << "\n#STATEMENT: " << token_string << endl; //###
         if (next_token == TOKEN_TYPE::END) {
             return;
         } else if (next_token == TOKEN_TYPE::IDENT) {
-            addToken();
             string id = token_string;
             _ID = 1;
             _symTable[id] = ""; //new variable
 
             lexical();
             if (next_token == TOKEN_TYPE::OP_ASSIGN) {
-                addToken();
                 lexical();
+                _symTable[id] = expression();
             } else {
                 msgError("missing assignment");
+                do {
+                    lexical();
+                } while (next_token != TOKEN_TYPE::SEMICOLON);
             }
-            _symTable[id] = expression();
 cout << "--- " << id << "(" << _symTable[id] << ")\n"; //###
         } else {
             msgError("missing identifier");
         }
 
         printStatement();
+        _tokens.clear();
     }
 
     void statements() {
@@ -250,6 +250,7 @@ printf("WARNING: CH %d(%c)\n", _ch, _ch); //###
             next_token = TOKEN_TYPE::NONE;
             getChar();
         }
+        _tokens.push_back(token_string);
         while (isspace(_ch)) getChar(); //remove tailing space
     }
 };
@@ -267,10 +268,3 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-/**
-TODO
-    operand 시작 시 연산자가 오는 경우
-    operand := 3; -> operand :+ 3
-                  -> operand := + 3 + 3
-
-**/
