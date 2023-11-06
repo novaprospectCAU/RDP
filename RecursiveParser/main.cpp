@@ -4,8 +4,6 @@
 #include <map>
 #include <stdio.h>
 
-//###: debugging tool sentence
-
 using namespace std;
 
 class RDP { //recursive descent parsing
@@ -105,7 +103,6 @@ private:
     }
 
     string factor() {
-cout << "   #FACTOR: " << token_string << endl; //###
         string ret;
         if (next_token == TOKEN_TYPE::IDENT) {
             if (_symTable.find(token_string) == _symTable.end()) {
@@ -113,7 +110,6 @@ cout << "   #FACTOR: " << token_string << endl; //###
                 msgError("undefined variable (" + token_string + ") referenced");
             }
             ret = _symTable[token_string];
-cout << "--- " << token_string << "(" << ret << ")\n"; //###
             lexical();
         } else if (next_token == TOKEN_TYPE::CONST) {
             ret = token_string;
@@ -136,14 +132,11 @@ cout << "--- " << token_string << "(" << ret << ")\n"; //###
     }
 
     string term() {
-cout << "   #TERM: " << token_string << endl; //###
         string ret = factor();
-cout << "   #FACTOR_TAIL: " << token_string << endl; //###
         while (next_token == TOKEN_TYPE::OP_MULTIPLY || next_token == TOKEN_TYPE::OP_DIVIDE) {
             TOKEN_TYPE op = next_token;
             lexical();
             string val = factor();
-cout << "*****[" << ret << "][" << val << "]\n"; //###
             if (ret.empty() || val.empty());
             else if (op == TOKEN_TYPE::OP_MULTIPLY) {
                 ret = to_string(stoi(ret) * stoi(val));
@@ -155,14 +148,11 @@ cout << "*****[" << ret << "][" << val << "]\n"; //###
     }
 
     string expression() {
-cout << "   #EXPRESSION: " << token_string << endl; //###
         string ret = term();
-cout << "   #TERM_TAIL: " << token_string << endl; //###
         while (next_token == TOKEN_TYPE::OP_PLUS || next_token == TOKEN_TYPE::OP_MINUS) {
             TOKEN_TYPE op = next_token;
             lexical();
             string val = term();
-cout << "***[" << ret << "][" << val << "]\n"; //###
             if (ret.empty() || val.empty());
             else if (op == TOKEN_TYPE::OP_PLUS) {
                 ret = to_string(stoi(ret) + stoi(val));
@@ -176,7 +166,6 @@ cout << "***[" << ret << "][" << val << "]\n"; //###
     void statement() {
         _result = "";
         _ID = _CONST = _OP = 0;
-cout << "\n#STATEMENT: " << token_string << endl; //###
         if (next_token == TOKEN_TYPE::END) {
             return;
         } else if (next_token == TOKEN_TYPE::IDENT) {
@@ -194,7 +183,6 @@ cout << "\n#STATEMENT: " << token_string << endl; //###
                     lexical();
                 } while (next_token != TOKEN_TYPE::SEMICOLON);
             }
-cout << "--- " << id << "(" << _symTable[id] << ")\n"; //###
         } else {
             msgError("missing identifier");
         }
@@ -246,7 +234,6 @@ cout << "--- " << id << "(" << _symTable[id] << ")\n"; //###
         } else if (_ch == EOF) {
             next_token = TOKEN_TYPE::END;
         } else {
-printf("WARNING: CH %d(%c)\n", _ch, _ch); //###
             next_token = TOKEN_TYPE::NONE;
             getChar();
         }
