@@ -1,1 +1,5 @@
-
+- OS: Windows 11 ver.22H2(OS build 22621.2283)
+- Compiler: Code::Blocks 20.03 GCC MinGW-W64 project (version 8.1.0, 32/64 bit, SEH)
+- 컴파일 방법: 'Build' 실행
+- 실행 방법: RecursiveParser -> bin -> Debug -> cmd 실행 'RecursiveParser.exe input.txt' 입력
+- 컴파일 시 주의 사항 : 최소 C++11버전이 요구됩니다. 이하 버전에서는 돌아가지 않습니다.
